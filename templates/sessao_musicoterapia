@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block title %}Sessão de Musicoterapia{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>Sessão de Musicoterapia</h1>
+</div>
+<h3>Consulta com o Dr. Musicoterapeuta Gabriel Marcos.</h3>
+{% endblock %}
