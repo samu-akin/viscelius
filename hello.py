@@ -1,101 +1,73 @@
-import os
-from flask import Flask, render_template, session, redirect, url_for
+from flask import Flask, render_template, session, redirect, url_for, flash, request
 from flask_bootstrap import Bootstrap
 from flask_moment import Moment
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField
+from wtforms import StringField, SubmitField, PasswordField
 from wtforms.validators import DataRequired
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-
-basedir = os.path.abspath(os.path.dirname(__file__))
+from datetime import datetime
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'hard to guess string'
-app.config['SQLALCHEMY_DATABASE_URI'] =\
-    'sqlite:///' + os.path.join(basedir, 'data.sqlite')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 bootstrap = Bootstrap(app)
 moment = Moment(app)
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
 
+# Formulário para login
+class LoginForm(FlaskForm):
+    username = StringField('Usuário', validators=[DataRequired()])
+    password = PasswordField('Senha', validators=[DataRequired()])
+    submit = SubmitField('Entrar')
 
-class Role(db.Model):
-    __tablename__ = 'roles'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), unique=True)
-    users = db.relationship('User', backref='role', lazy='dynamic')
+# Formulário para agendar consulta
+class AgendarConsultaForm(FlaskForm):
+    name = StringField('Nome', validators=[DataRequired()])
+    date = StringField('Data da Consulta', validators=[DataRequired()])
+    submit = SubmitField('Agendar Consulta')
 
-    def __repr__(self):
-        return '<Role %r>' % self.name
-
-
-class User(db.Model):
-    __tablename__ = 'users'
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(64), unique=True, index=True)
-    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
-
-    def __repr__(self):
-        return '<User %r>' % self.username
-
-
-class NameForm(FlaskForm):
-    name = StringField('What is your name?', validators=[DataRequired()])
-    submit = SubmitField('Submit')
-
-
-@app.shell_context_processor
-def make_shell_context():
-    return dict(db=db, User=User, Role=Role)
-
-
-@app.errorhandler(404)
-def page_not_found(e):
-    return render_template('404.html'), 404
-
-
-@app.errorhandler(500)
-def internal_server_error(e):
-    return render_template('500.html'), 500
-
-
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/', methods=['GET'])
 def index():
-    form = NameForm()
-    user_all = User.query.all();
-    print(user_all);
-    if form.validate_on_submit():
-        user = User.query.filter_by(username=form.name.data).first()                
-        if user is None:
-            user_role = Role.query.filter_by(name='User').first();
-            user = User(username=form.name.data, role=user_role);
-            db.session.add(user)
-            db.session.commit()
-            session['known'] = False
-        else:
-            session['known'] = True
-        session['name'] = form.name.data
-        return redirect(url_for('index'))
-    return render_template('index.html', form=form, name=session.get('name'),
-                           known=session.get('known', False),
-                           user_all=user_all);
+    return render_template('index.html', title="Página Inicial")
 
-@app.route('/about')
-def about():
-    info = {
-        "title": "Sobre o Site",
-        "description": "Este site foi desenvolvido para demonstrar funcionalidades de Flask. "
-                       "Ele permite cadastrar usuários e gerenciar funções de maneira prática e eficiente.",
-        "features": [
-            "Cadastrar novos usuários.",
-            "Listar todos os usuários e suas funções.",
-            "Design responsivo com Flask-Bootstrap.",
-            "Persistência de dados com SQLAlchemy."
-        ],
-        "creator": "Samuel Akinroyeje",
-        "contact": "akinroyeje.s@aluno.ifsp.edu.br"
-    }
-    return render_template('about.html', info=info)
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        flash(f'Bem-vindo, {form.username.data}!', 'success')
+        return redirect(url_for('index'))
+    return render_template('login.html', title="Login", form=form)
+
+@app.route('/agendar_consultas', methods=['GET', 'POST'])
+def agendar_consultas():
+    form = AgendarConsultaForm()
+    if form.validate_on_submit():
+        flash('Consulta agendada com sucesso!', 'success')
+        return redirect(url_for('index'))
+    return render_template('agendar_consultas.html', title="Agendar Consultas", form=form)
+
+@app.route('/sessao_musicoterapia', methods=['GET'])
+def sessao_musicoterapia():
+    return render_template('sessao_musicoterapia.html', title="Sessão de Musicoterapia")
+
+@app.route('/resultados_consultas', methods=['GET'])
+def resultados_consultas():
+    minutos_ouvidos = 120  # Exemplo de valor
+    exercicios_realizados = 5  # Exemplo de valor
+    consultas_realizadas = 10  # Exemplo de valor
+    horas_sono = 8  # Exemplo de valor
+    return render_template('resultados_consultas.html', 
+                           title="Resultados de Consultas", 
+                           minutos_ouvidos=minutos_ouvidos, 
+                           exercicios_realizados=exercicios_realizados,
+                           consultas_realizadas=consultas_realizadas, 
+                           horas_sono=horas_sono)
+
+@app.route('/playlist_musicas', methods=['GET'])
+def playlist_musicas():
+    return render_template('playlist_musicas.html', title="Playlist de Músicas")
+
+@app.route('/exercicios', methods=['GET'])
+def exercicios():
+    return render_template('exercicios.html', title="Exercícios")
+
+if __name__ == '__main__':
+    app.run(debug=True)
