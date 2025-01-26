@@ -28,6 +28,14 @@ class AgendarConsultaForm(FlaskForm):
 def index():
     return render_template('index.html', title="Página Inicial")
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        flash(f'Bem-vindo, {form.username.data}!', 'success')
+        return redirect(url_for('index'))
+    return render_template('login.html', title="Login", form=form)
+
 @app.route('/agendar_consultas', methods=['GET', 'POST'])
 def agendar_consultas():
     form = AgendarConsultaForm()
