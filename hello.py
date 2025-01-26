@@ -59,6 +59,7 @@ def login():
         if user and check_password_hash(user[0], password):
             # Login bem-sucedido
             flash(f'Bem-vindo, {username}!', 'success')
+            session['logged_in'] = True
             session['username'] = username  # Opcional: salvar o usuário na sessão
             return redirect(url_for('index'))
         else:
