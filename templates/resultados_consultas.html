@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Resultados de Consultas{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>Resultados da Sessão de Musicoterapia</h1>
+    <h2>Estatísticas</h2>
+</div>
+<ul>
+    <h3>Minutos Ouvidos: {{ minutos_ouvidos }}</h3>
+    <h3>Exercícios Realizados: {{ exercicios_realizados }}</h3>
+    <h3>Consultas Realizadas: {{ consultas_realizadas }}</h3>
+    <h3>Horas de Sono: {{ horas_sono }}</h3>
+</ul>
+{% endblock %}
