@@ -5,6 +5,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, PasswordField
 from wtforms.validators import DataRequired
 from datetime import datetime
+from werkzeug.security import check_password_hash
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'hard to guess string'
@@ -43,15 +44,26 @@ def index():
 def login():
     form = LoginForm()
     if form.validate_on_submit():
+        # Conectar ao banco e verificar usuário
         username = form.username.data
         password = form.password.data
-        # Simples validação (em um caso real, usar banco de dados)
-        if username == "admin" and password == "1234":
-            session['logged_in'] = True
+
+        import sqlite3
+        conn = sqlite3.connect('users.db')
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT password FROM users WHERE username = ?", (username,))
+        user = cursor.fetchone()
+        conn.close()
+
+        if user and check_password_hash(user[0], password):
+            # Login bem-sucedido
             flash(f'Bem-vindo, {username}!', 'success')
+            session['username'] = username  # Opcional: salvar o usuário na sessão
             return redirect(url_for('index'))
         else:
-            flash('Usuário ou senha incorretos.', 'danger')
+            flash('Usuário ou senha incorretos!', 'danger')
+
     return render_template('login.html', title="Login", form=form)
 
 @app.route('/logout', methods=['GET'])
