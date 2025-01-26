@@ -27,12 +27,16 @@
         </div>
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-                <li><a href="/login">Login</a></li>
-                <li><a href="/agendar_consultas">Agendar Consultas</a></li>
-                <li><a href="/sessao_musicoterapia">Sessão de Musicoterapia</a></li>
-                <li><a href="/resultados_consultas">Resultados de Consultas</a></li>
-                <li><a href="/playlist_musicas">Playlist de Músicas</a></li>
-                <li><a href="/exercicios">Exercícios</a></li>
+                {% if session.get('logged_in') %}
+                    <li><a href="/agendar_consultas">Agendar Consultas</a></li>
+                    <li><a href="/sessao_musicoterapia">Sessão de Musicoterapia</a></li>
+                    <li><a href="/resultados_consultas">Resultados de Consultas</a></li>
+                    <li><a href="/playlist_musicas">Playlist de Músicas</a></li>
+                    <li><a href="/exercicios">Exercícios</a></li>
+                    <li><a href="/logout">Logout</a></li>
+                {% else %}
+                    <li><a href="/login">Login</a></li>
+                {% endif %}
             </ul>
         </div>
     </div>
